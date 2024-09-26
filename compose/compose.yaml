@@ -1,0 +1,22 @@
+services:
+  eureka:
+    image: eduardomarcello/eureka:latest
+    container_name: EUREKA-SERVER
+    ports:
+      - "8761:8761"
+    networks:
+      - AT
+  veiculos-service:
+    image: eduardomarcello/veiculos:latest
+    networks:
+      - AT
+    depends_on:
+      - eureka
+    ports:
+      - "8080:8080"
+    expose:
+      - "8080:8080"
+
+networks:
+  AT:
+    driver: bridge
