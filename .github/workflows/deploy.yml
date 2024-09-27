@@ -22,13 +22,14 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '17'
+          distribution: 'temurin'  # Adicionando a distribuição do JDK
 
       # Compilar e empacotar o veiculos-service
       - name: Build veiculos-service with Maven
         run: mvn -f veiculos-service/pom.xml clean package
 
       - name: List veiculos-service target files
-        run: ls -la veiculos-service/target/  # Listando os arquivos no diretório target
+        run: ls -la veiculos-service/target/
 
       - name: Run veiculos-service tests
         run: mvn -f veiculos-service/pom.xml test
@@ -38,7 +39,7 @@ jobs:
         run: mvn -f ex_eurekaServer/pom.xml clean package
 
       - name: List ex_eurekaServer target files
-        run: ls -la ex_eurekaServer/target/  # Listando os arquivos no diretório target
+        run: ls -la ex_eurekaServer/target/
 
       - name: Run ex_eurekaServer tests
         run: mvn -f ex_eurekaServer/pom.xml test
