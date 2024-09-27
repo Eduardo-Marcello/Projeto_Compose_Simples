@@ -3,27 +3,23 @@ package br.com.marcello.veiculosservice.controller;
 import br.com.marcello.veiculosservice.model.Veiculo;
 import br.com.marcello.veiculosservice.service.VeiculoService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/")
 @AllArgsConstructor
+@Slf4j
 public class VeiculoController {
     private VeiculoService service;
 
-    @GetMapping
-    public ResponseEntity<List<Veiculo>> findAll() {
-        List<Veiculo> veiculos = service.findAll();
-        if (veiculos.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        } else {
-            return ResponseEntity.ok(veiculos);
-        }
 
+    @GetMapping
+    public ResponseEntity<?> findAll() {
+        return ResponseEntity.ok(service.findAll());
     }
 
     @GetMapping("{id}")
@@ -33,6 +29,11 @@ public class VeiculoController {
         } else {
             return ResponseEntity.ok(service.findById(id));
         }
+    }
+
+    @GetMapping("status")
+    public ResponseEntity<?> status() {
+        return ResponseEntity.ok("Serviço está ativo e operando.");
     }
 
     @PostMapping
@@ -46,10 +47,10 @@ public class VeiculoController {
 
     @PutMapping("{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Veiculo veiculo) {
-        if (veiculo == null || veiculo.getId() == null) {
-            return ResponseEntity.notFound().build();
-        } else {
+        if (veiculo != null || id != null) {
             return ResponseEntity.ok(service.update(id, veiculo));
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
 
