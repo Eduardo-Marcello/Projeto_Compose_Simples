@@ -1,47 +1,59 @@
-name: Deploy to Kubernetes
+name: CI Pipeline
 
 on:
-  workflow_run:
-    workflows: ["Build and Test Pipeline"]
-    types:
-      - completed
+  push:
+    branches:
+      - main
+      - edhyde
+  pull_request:
+    branches:
+      - main
+      - edhyde
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Log in to Docker Hub (use secrets for your credentials)
-      - name: Login to Docker Hub
-        run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'  # Adicionando a distribuição do JDK
 
-      # Build Docker image for veiculos-service
-      - name: Build veiculos-service Docker image
-        run: docker build -t yourdockerhubusername/veiculos-service:latest veiculos-service/
+      # Compilar e empacotar o veiculos-service
+      - name: Build veiculos-service with Maven
+        run: mvn -f veiculos-service/pom.xml clean package
 
-      # Build Docker image for ex_eurekaServer
-      - name: Build ex_eurekaServer Docker image
-        run: docker build -t yourdockerhubusername/ex_eurekaServer:latest ex_eurekaServer/
+      - name: List veiculos-service target files
+        run: ls -la veiculos-service/target/
 
-      # Push veiculos-service Docker image
-      - name: Push veiculos-service Docker image
-        run: docker push yourdockerhubusername/veiculos-service:latest
+      - name: Run veiculos-service tests
+        run: mvn -f veiculos-service/pom.xml test
 
-      # Push ex_eurekaServer Docker image
-      - name: Push ex_eurekaServer Docker image
-        run: docker push yourdockerhubusername/ex_eurekaServer:latest
+      # Compilar e empacotar o ex_eurekaServer
+      - name: Build ex_eurekaServer with Maven
+        run: mvn -f ex_eurekaServer/pom.xml clean package
 
-      # Deploy veiculos-service to Kubernetes
-      - name: Deploy veiculos-service to Kubernetes
-        run: |
-          kubectl set image deployment/veiculos-service veiculos-service=yourdockerhubusername/veiculos-service:latest
-          kubectl rollout status deployment/veiculos-service
+      - name: List ex_eurekaServer target files
+        run: ls -la ex_eurekaServer/target/
 
-      # Deploy ex_eurekaServer to Kubernetes
-      - name: Deploy ex_eurekaServer to Kubernetes
-        run: |
-          kubectl set image deployment/ex-eurekaServer ex-eurekaServer=yourdockerhubusername/ex_eurekaServer:latest
-          kubectl rollout status deployment/ex-eurekaServer
+      - name: Run ex_eurekaServer tests
+        run: mvn -f ex_eurekaServer/pom.xml test
+
+      # Upload de artefatos do veiculos-service
+      - name: Upload veiculos-service build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: veiculos-service-build
+          path: veiculos-service/target/*.jar
+
+      # Upload de artefatos do ex_eurekaServer
+      - name: Upload ex_eurekaServer build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ex_eurekaServer-build
+          path: ex_eurekaServer/target/*.jar
