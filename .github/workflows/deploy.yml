@@ -16,37 +16,43 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
           java-version: '17'
 
-      # Compilar e rodar testes do veiculos-service
+      # Compilar e empacotar o veiculos-service
       - name: Build veiculos-service with Maven
-        run: mvn -f veiculos-service/pom.xml clean compile
+        run: mvn -f veiculos-service/pom.xml clean package
+
+      - name: List veiculos-service target files
+        run: ls -la veiculos-service/target/  # Listando os arquivos no diretório target
 
       - name: Run veiculos-service tests
         run: mvn -f veiculos-service/pom.xml test
 
-      # Compilar e rodar testes do ex_eurekaServer
+      # Compilar e empacotar o ex_eurekaServer
       - name: Build ex_eurekaServer with Maven
-        run: mvn -f ex_eurekaServer/pom.xml clean compile
+        run: mvn -f ex_eurekaServer/pom.xml clean package
+
+      - name: List ex_eurekaServer target files
+        run: ls -la ex_eurekaServer/target/  # Listando os arquivos no diretório target
 
       - name: Run ex_eurekaServer tests
         run: mvn -f ex_eurekaServer/pom.xml test
 
       # Upload de artefatos do veiculos-service
       - name: Upload veiculos-service build artifacts
-        uses: actions/upload-artifact@v3  # Atualizando para a versão v3
+        uses: actions/upload-artifact@v3
         with:
           name: veiculos-service-build
           path: veiculos-service/target/*.jar
 
       # Upload de artefatos do ex_eurekaServer
       - name: Upload ex_eurekaServer build artifacts
-        uses: actions/upload-artifact@v3  # Atualizando para a versão v3
+        uses: actions/upload-artifact@v3
         with:
           name: ex_eurekaServer-build
           path: ex_eurekaServer/target/*.jar
