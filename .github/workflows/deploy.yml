@@ -37,7 +37,16 @@ jobs:
       - name: Run ex_eurekaServer tests
         run: mvn -f ex_eurekaServer/pom.xml test
 
+      # Upload de artefatos do veiculos-service
+      - name: Upload veiculos-service build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: veiculos-service-build
+          path: veiculos-service/target/
 
-       
-    
-    
+      # Upload de artefatos do ex_eurekaServer
+      - name: Upload ex_eurekaServer build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ex_eurekaServer-build
+          path: ex_eurekaServer/target/
