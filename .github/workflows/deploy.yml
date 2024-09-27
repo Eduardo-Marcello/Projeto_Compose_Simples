@@ -42,11 +42,11 @@ jobs:
         uses: actions/upload-artifact@v3  # Atualizando para a versão v3
         with:
           name: veiculos-service-build
-          path: veiculos-service/target/
+          path: veiculos-service/target/*.jar
 
       # Upload de artefatos do ex_eurekaServer
       - name: Upload ex_eurekaServer build artifacts
         uses: actions/upload-artifact@v3  # Atualizando para a versão v3
         with:
           name: ex_eurekaServer-build
-          path: ex_eurekaServer/target/
+          path: ex_eurekaServer/target/*.jar
