@@ -1,0 +1,44 @@
+name: Deploy to Kubernetes
+
+on:
+  workflow_run:
+    workflows: ["Build and Test Pipeline"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Log in to Docker Hub (use secrets for your credentials)
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+
+      # Build Docker image for veiculos-service
+      - name: Build veiculos-service Docker image
+        run: docker build -t yourdockerhubusername/veiculos-service:latest veiculos-service/
+
+      # Build Docker image for ex_eurekaServer
+      - name: Build ex_eurekaServer Docker image
+        run: docker build -t yourdockerhubusername/ex_eurekaServer:latest ex_eurekaServer/
+
+      # Push veiculos-service Docker image
+      - name: Push veiculos-service Docker image
+        run: docker push yourdockerhubusername/veiculos-service:latest
+
+      # Push ex_eurekaServer Docker image
+      - name: Push ex_eurekaServer Docker image
+        run: docker push yourdockerhubusername/ex_eurekaServer:latest
+
+      # Deploy veiculos-service to Kubernetes
+      - name: Deploy veiculos-service to Kubernetes
+        run: |
+          kubectl set image deployment/veiculos-service veiculos-service=yourdockerhubusername/veiculos-service:latest
+          kubectl rollout status deployment/veiculos-service
+
+      # Deploy ex_eurekaServer to Kubernetes
+      - name: Deploy ex_eurekaServ
